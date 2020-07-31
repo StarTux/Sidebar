@@ -1,0 +1,24 @@
+main: com.cavetale.sidebar.SidebarPlugin
+name: Sidebar
+version: 0.1
+api-version: 1.13
+description: Display a sidebar, fill with information via API
+author: StarTux
+website: https://cavetale.com
+depend: []
+softdepend: []
+
+commands:
+  sidebar:
+    aliases: []
+    description: User interface
+    permission: sidebar.sidebar
+    usage: |-
+      /sidebar toggle - Turn display on/off
+      /sidebar on - Turn display on
+      /sidebar off - Turn display off
+
+permissions:
+  sidebar.sidebar:
+    description: Use /sidebar
+    default: op
