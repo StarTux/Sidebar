@@ -1,6 +1,6 @@
 # Sidebar
 
-Provide a per-player sidebar for other plugins to print messages in.
+Provide a per-player sidebar for plugins to display messages in.
 
 ## Interface
 

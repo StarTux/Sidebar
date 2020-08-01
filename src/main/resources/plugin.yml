@@ -1,10 +1,13 @@
 main: com.cavetale.sidebar.SidebarPlugin
 name: Sidebar
+
 version: 0.1
 api-version: 1.13
-description: Display a sidebar, fill with information via API
+description: Provide a per-player sidebar for plugins to display messages in.
+
 author: StarTux
-website: https://cavetale.com
+website: https://github.com/StarTux/Sidebar
+
 depend: []
 softdepend: []
 

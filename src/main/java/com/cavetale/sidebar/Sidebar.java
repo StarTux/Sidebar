@@ -118,7 +118,6 @@ public final class Sidebar {
                 }
                 line.update();
                 objective.getScore(line.format).setScore(1);
-                System.out.println("update: " + line.index);
             }
         }
     }
