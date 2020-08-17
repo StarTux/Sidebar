@@ -21,9 +21,12 @@ public final class Sidebar {
     private final List<Line> lines;
     private int cursor = 0;
     static final String CHARS = "!\"#$%&'()*+,-./GHIJPQRSTUVWXYZ";
+    private boolean warned = false;
+    private final String playerName;
 
-    public Sidebar(@NonNull final SidebarPlugin plugin) {
+    public Sidebar(@NonNull final SidebarPlugin plugin, final String playerName) {
         this.plugin = plugin;
+        this.playerName = playerName;
         scoreboard = Bukkit.getServer().getScoreboardManager()
             .getNewScoreboard();
         objective = scoreboard.registerNewObjective("sidebar", "dummy");
@@ -45,9 +48,9 @@ public final class Sidebar {
                                             + "/" + lines.size());
         }
         Line line;
-        if (cursor == lines.size()) {
+        if (!warned && cursor == lines.size()) {
             if (lines.size() >= 15) {
-                plugin.getLogger().warning("Sidebar line count exceeds 15!");
+                plugin.getLogger().warning(playerName + ": Sidebar line count exceeds 15!");
                 return;
             }
             line = new Line(cursor);

@@ -23,7 +23,7 @@ public final class Sessions {
      */
     public Sidebar of(Player player) {
         return sidebars.computeIfAbsent(player.getUniqueId(), u -> {
-                Sidebar sidebar = new Sidebar(plugin);
+                Sidebar sidebar = new Sidebar(plugin, player.getName());
                 sidebar.setTitle(ChatColor.GREEN + "/sidebar");
                 sidebar.open(player);
                 return sidebar;
