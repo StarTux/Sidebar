@@ -48,9 +48,12 @@ public final class Sidebar {
                                             + "/" + lines.size());
         }
         Line line;
-        if (!warned && cursor == lines.size()) {
+        if (cursor == lines.size()) {
             if (lines.size() >= 15) {
-                plugin.getLogger().warning(playerName + ": Sidebar line count exceeds 15!");
+                if (!warned) {
+                    warned = true;
+                    plugin.getLogger().warning(playerName + ": Sidebar line count exceeds 15!");
+                }
                 return;
             }
             line = new Line(cursor);
