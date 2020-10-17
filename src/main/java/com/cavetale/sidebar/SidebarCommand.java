@@ -59,7 +59,7 @@ public final class SidebarCommand implements TabExecutor {
         case "on": {
             if (args.length > 0) return false;
             Sidebar sidebar = plugin.sessions.of(player);
-            if (sidebar.canSee(player)) {
+            if (!sidebar.canSee(player)) {
                 sidebar.open(player);
                 player.sendMessage(ChatColor.GREEN + "Sidebar enabled.");
             } else {
