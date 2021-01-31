@@ -2,6 +2,7 @@ package com.cavetale.sidebar;
 
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.Bukkit;
@@ -10,28 +11,31 @@ import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.Team;
 
 /**
  * The actual sidebar for one player.
  */
+@Getter
 public final class Sidebar {
+    static final String CHARS = "!\"#$%&'()*+,-./GHIJPQRSTUVWXYZ";
     private final SidebarPlugin plugin;
     private final Scoreboard scoreboard;
     private final Objective objective;
     private final List<Line> lines;
     private int cursor = 0;
-    static final String CHARS = "!\"#$%&'()*+,-./GHIJPQRSTUVWXYZ";
     private boolean warned = false;
     private final String playerName;
 
-    public Sidebar(@NonNull final SidebarPlugin plugin, final String playerName) {
+    public Sidebar(@NonNull final SidebarPlugin plugin, final Player player) {
         this.plugin = plugin;
-        this.playerName = playerName;
-        scoreboard = Bukkit.getServer().getScoreboardManager()
-            .getNewScoreboard();
+        this.playerName = player.getName();
+        scoreboard = Bukkit.getServer().getScoreboardManager().getNewScoreboard();
         objective = scoreboard.registerNewObjective("sidebar", "dummy");
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
         lines = new ArrayList<>();
+        Team team = scoreboard.registerNewTeam("sidebar");
+        team.addPlayer(player);
     }
 
     public void setCursor(final int newCursor) {

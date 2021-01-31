@@ -9,12 +9,12 @@ public final class SidebarPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        for (Player player : getServer().getOnlinePlayers()) {
-            sessions.enter(player);
-        }
         eventListener.register();
         getServer().getScheduler().runTaskTimer(this, this::onTick, 0, 1);
         new SidebarCommand(this).enable();
+        for (Player player : getServer().getOnlinePlayers()) {
+            sessions.enter(player);
+        }
     }
 
     @Override
