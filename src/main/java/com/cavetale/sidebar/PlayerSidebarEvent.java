@@ -6,6 +6,7 @@ import java.util.List;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
@@ -18,15 +19,30 @@ public final class PlayerSidebarEvent extends Event {
     @Getter final SidebarPlugin sidebarPlugin;
     @Getter final Player player;
 
-    public void addLines(@NonNull JavaPlugin plugin, @NonNull Priority priority, @NonNull List<String> lines) {
-        if (lines.isEmpty()) {
-            throw new IllegalArgumentException("Lines is empty");
+    public void addLines(@NonNull JavaPlugin plugin, @NonNull Priority priority, @NonNull List<String> strings) {
+        if (strings.isEmpty()) {
+            throw new IllegalArgumentException("strings is empty");
+        }
+        List<Component> lines = new ArrayList<>(strings.size());
+        for (String string : strings) {
+            lines.add(Component.text(string));
         }
         entries.add(new Entry(plugin, priority, lines));
     }
 
     public void addLines(@NonNull JavaPlugin plugin, @NonNull Priority priority, @NonNull String... lines) {
         addLines(plugin, priority, Arrays.asList(lines));
+    }
+
+    public void add(@NonNull JavaPlugin plugin, @NonNull Priority priority, @NonNull List<Component> lines) {
+        if (lines.isEmpty()) {
+            throw new IllegalArgumentException("lines is empty");
+        }
+        entries.add(new Entry(plugin, priority, lines));
+    }
+
+    public void add(@NonNull JavaPlugin plugin, @NonNull Priority priority, @NonNull Component... lines) {
+        add(plugin, priority, Arrays.asList(lines));
     }
 
     public Sidebar getSidebar() {

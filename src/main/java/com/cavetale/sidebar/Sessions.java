@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 
 @RequiredArgsConstructor
@@ -24,7 +24,6 @@ public final class Sessions {
     public Sidebar of(Player player) {
         return sidebars.computeIfAbsent(player.getUniqueId(), u -> {
                 Sidebar sidebar = new Sidebar(plugin, player);
-                sidebar.setTitle(ChatColor.GREEN + "/sidebar");
                 sidebar.open(player);
                 return sidebar;
             });
@@ -62,13 +61,12 @@ public final class Sessions {
         if (sidebar == null) {
             if (!plugin.hasPermission(player)) return;
             sidebar = of(player);
-        }
-        if (!plugin.hasPermission(player)) {
+        } else if (!plugin.hasPermission(player)) {
             sidebar.close(player);
             clear(player);
             return;
         }
-        if (!sidebar.canSee(player)) return;
+        if (!sidebar.canSee()) return;
         PlayerSidebarEvent event = new PlayerSidebarEvent(plugin, player);
         plugin.getServer().getPluginManager().callEvent(event);
         List<Entry> entries = event.entries;
@@ -84,9 +82,9 @@ public final class Sessions {
         for (int i = 0; i < entries.size(); i += 1) {
             Entry entry = entries.get(i);
             if (doInsertBreaks && i > 0) {
-                sidebar.newLine("");
+                sidebar.newLine(Component.empty());
             }
-            for (String line : entry.lines) {
+            for (Component line : entry.lines) {
                 sidebar.newLine(line);
             }
         }

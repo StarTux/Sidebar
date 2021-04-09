@@ -12,6 +12,7 @@ public final class SidebarPlugin extends JavaPlugin {
         eventListener.register();
         getServer().getScheduler().runTaskTimer(this, this::onTick, 0, 1);
         new SidebarCommand(this).enable();
+        new SidebarAdminCommand(this).enable();
         for (Player player : getServer().getOnlinePlayers()) {
             sessions.enter(player);
         }

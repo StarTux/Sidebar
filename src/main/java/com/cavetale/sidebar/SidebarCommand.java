@@ -1,10 +1,7 @@
 package com.cavetale.sidebar;
 
-import java.util.Arrays;
-import java.util.Collections;
+import com.cavetale.core.command.CommandNode;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -15,70 +12,66 @@ import org.bukkit.entity.Player;
 @RequiredArgsConstructor
 public final class SidebarCommand implements TabExecutor {
     private final SidebarPlugin plugin;
+    private CommandNode rootNode;
 
     void enable() {
+        rootNode = new CommandNode("sidebar");
+        rootNode.addChild("toggle").denyTabCompletion()
+            .description("Toggle sidebar")
+            .playerCaller(this::toggle);
+        rootNode.addChild("on").denyTabCompletion()
+            .description("Enable sidebar")
+            .playerCaller(this::on);
+        rootNode.addChild("off").denyTabCompletion()
+            .description("Disable sidebar")
+            .playerCaller(this::off);
         plugin.getCommand("sidebar").setExecutor(this);
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
-        if (!(sender instanceof Player)) {
-            sender.sendMessage("Player expected");
-            return true;
-        }
-        Player player = (Player) sender;
-        if (args.length == 0) return false;
-        return onCommand(player, args[0], Arrays.copyOfRange(args, 1, args.length));
+        return rootNode.call(sender, command, alias, args);
     }
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        if (args.length == 0) return null;
-        if (args.length == 1) {
-            return Stream.of("toggle", "on", "off")
-                .filter(a -> a.startsWith(args[0].toLowerCase()))
-                .collect(Collectors.toList());
-        }
-        return Collections.emptyList();
+        return rootNode.complete(sender, command, alias, args);
     }
 
-    boolean onCommand(Player player, String cmd, String[] args) {
-        switch (cmd) {
-        case "toggle": {
-            if (args.length > 0) return false;
-            Sidebar sidebar = plugin.sessions.of(player);
-            if (!sidebar.canSee(player)) {
-                sidebar.open(player);
-                player.sendMessage(ChatColor.GREEN + "Sidebar enabled.");
-            } else {
-                sidebar.close(player);
-                player.sendMessage(ChatColor.RED + "Sidebar disabled.");
-            }
-            return true;
+    boolean toggle(Player player, String[] args) {
+        if (args.length != 0) return false;
+        Sidebar sidebar = plugin.sessions.of(player);
+        if (!sidebar.canSee()) {
+            sidebar.show();
+            player.sendMessage(ChatColor.GREEN + "Sidebar enabled.");
+        } else {
+            sidebar.hide();
+            player.sendMessage(ChatColor.RED + "Sidebar disabled.");
         }
-        case "on": {
-            if (args.length > 0) return false;
-            Sidebar sidebar = plugin.sessions.of(player);
-            if (!sidebar.canSee(player)) {
-                sidebar.open(player);
-                player.sendMessage(ChatColor.GREEN + "Sidebar enabled.");
-            } else {
-                player.sendMessage(ChatColor.GREEN + "Already enabled.");
-            }
-            return true;
+        return true;
+    }
+
+    boolean on(Player player, String[] args) {
+        if (args.length != 0) return false;
+        Sidebar sidebar = plugin.sessions.of(player);
+        if (!sidebar.canSee()) {
+            sidebar.show();
+            player.sendMessage(ChatColor.GREEN + "Sidebar enabled.");
+        } else {
+            player.sendMessage(ChatColor.GREEN + "Already enabled.");
         }
-        case "off": {
-            if (args.length > 0) return false;
-            Sidebar sidebar = plugin.sessions.of(player);
-            if (sidebar.canSee(player)) {
-                sidebar.close(player);
-                player.sendMessage(ChatColor.RED + "Sidebar disabled.");
-            } else {
-                player.sendMessage(ChatColor.RED + "Already disabled.");
-            }
-            return true;
+        return true;
+    }
+
+    boolean off(Player player, String[] args) {
+        if (args.length != 0) return false;
+        Sidebar sidebar = plugin.sessions.of(player);
+        if (sidebar.canSee()) {
+            sidebar.hide();
+            player.sendMessage(ChatColor.RED + "Sidebar disabled.");
+        } else {
+            player.sendMessage(ChatColor.RED + "Already disabled.");
         }
-        default: return false;
-        }
+        return true;
     }
 }

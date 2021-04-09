@@ -8,10 +8,11 @@ description: Provide a per-player sidebar for plugins to display messages in.
 author: StarTux
 website: https://github.com/StarTux/Sidebar
 
-depend: []
+depend: [Core]
 softdepend: []
 
 commands:
+
   sidebar:
     aliases: []
     description: User interface
@@ -21,7 +22,19 @@ commands:
       /sidebar on - Turn display on
       /sidebar off - Turn display off
 
+  sidebaradmin:
+    aliases: []
+    description: Admin interface
+    permission: sidebar.admin
+    usage: |-
+      /sidebaradmin
+
 permissions:
+
   sidebar.sidebar:
     description: Use /sidebar
+    default: op
+
+  sidebar.admin:
+    description: Use /sidebaradmin
     default: op
