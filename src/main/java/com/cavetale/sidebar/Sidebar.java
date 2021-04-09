@@ -75,7 +75,7 @@ public final class Sidebar {
                 }
                 return;
             }
-            line = new Line(cursor);
+            line = new Line(lines.size());
             lines.add(line);
             line.enable();
         } else {
@@ -184,6 +184,9 @@ public final class Sidebar {
             now = Component.empty();
             team.prefix(now);
             old = now;
+            if (debug) {
+                getPlayer().sendMessage(Component.text("Sidebar enable line #" + index + ": ").append(now));
+            }
         }
 
         void disable() {
@@ -198,11 +201,11 @@ public final class Sidebar {
 
         void update() {
             if (old.equals(now)) return;
+            old = now;
+            team.prefix(now);
             if (debug) {
                 getPlayer().sendMessage(Component.text("Sidebar update line #" + index + ": ").append(now));
             }
-            old = now;
-            team.prefix(now);
         }
     }
 }
