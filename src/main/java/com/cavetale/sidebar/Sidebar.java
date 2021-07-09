@@ -15,6 +15,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
+import org.bukkit.scoreboard.RenderType;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
@@ -42,11 +43,11 @@ public final class Sidebar {
         this.playerUuid = player.getUniqueId();
         this.playerName = player.getName();
         scoreboard = Bukkit.getServer().getScoreboardManager().getNewScoreboard();
-        objective = scoreboard.registerNewObjective("sidebar", "dummy");
+        objective = scoreboard.registerNewObjective("sidebar", "dummy", Component.text("/sidebar"), RenderType.INTEGER);
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
         lines = new ArrayList<>();
-        Team team = scoreboard.registerNewTeam("sidebar");
-        team.addPlayer(player);
+        Team team = scoreboard.registerNewTeam("Sidebar");
+        team.addEntry(player.getName());
     }
 
     public Player getPlayer() {

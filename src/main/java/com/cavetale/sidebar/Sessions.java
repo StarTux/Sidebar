@@ -37,7 +37,6 @@ public final class Sessions {
      * Player joins or is online while plugin loads.
      */
     void enter(Player player) {
-        if (!plugin.hasPermission(player)) return;
         Sidebar sidebar = get(player);
         if (sidebar != null) {
             sidebar.close(player);
@@ -59,11 +58,9 @@ public final class Sessions {
     void tick(Player player) {
         Sidebar sidebar = get(player);
         if (sidebar == null) {
-            if (!plugin.hasPermission(player)) return;
             sidebar = of(player);
         } else if (!plugin.hasPermission(player)) {
-            sidebar.close(player);
-            clear(player);
+            sidebar.reset();
             return;
         }
         if (!sidebar.canSee()) return;

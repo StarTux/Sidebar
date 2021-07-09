@@ -2,7 +2,7 @@ main: com.cavetale.sidebar.SidebarPlugin
 name: Sidebar
 
 version: 0.1
-api-version: 1.13
+api-version: 1.17
 description: Provide a per-player sidebar for plugins to display messages in.
 
 author: StarTux
