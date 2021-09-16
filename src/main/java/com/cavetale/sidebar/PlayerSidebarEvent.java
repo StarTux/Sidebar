@@ -19,6 +19,7 @@ public final class PlayerSidebarEvent extends Event {
     @Getter final SidebarPlugin sidebarPlugin;
     @Getter final Player player;
 
+    @Deprecated
     public void addLines(@NonNull JavaPlugin plugin, @NonNull Priority priority, @NonNull List<String> strings) {
         if (strings.isEmpty()) {
             throw new IllegalArgumentException("strings is empty");
@@ -30,6 +31,7 @@ public final class PlayerSidebarEvent extends Event {
         entries.add(new Entry(plugin, priority, lines));
     }
 
+    @Deprecated
     public void addLines(@NonNull JavaPlugin plugin, @NonNull Priority priority, @NonNull String... lines) {
         addLines(plugin, priority, Arrays.asList(lines));
     }
