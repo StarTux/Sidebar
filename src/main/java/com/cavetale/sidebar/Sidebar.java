@@ -30,7 +30,6 @@ public final class Sidebar {
     private final Objective objective;
     private final List<Line> lines;
     private int cursor = 0;
-    private boolean warned = false;
     private final UUID playerUuid;
     private final String playerName;
     private boolean visible = true;
@@ -70,10 +69,6 @@ public final class Sidebar {
         Line line;
         if (cursor == lines.size()) {
             if (lines.size() >= 15) {
-                if (!warned) {
-                    warned = true;
-                    plugin.getLogger().warning(playerName + ": Sidebar line count exceeds 15!");
-                }
                 return;
             }
             line = new Line(lines.size());
