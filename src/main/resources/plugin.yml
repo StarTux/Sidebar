@@ -23,7 +23,7 @@ commands:
       /sidebar off - Turn display off
 
   sidebaradmin:
-    aliases: []
+    aliases: [sidebaradm]
     description: Admin interface
     permission: sidebar.admin
     usage: |-

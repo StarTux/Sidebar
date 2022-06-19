@@ -3,10 +3,12 @@ package com.cavetale.sidebar;
 import com.cavetale.core.event.hud.PlayerBossBarEntry;
 import java.util.Collections;
 import java.util.List;
+import lombok.Getter;
 import net.kyori.adventure.bossbar.BossBar;
 import org.bukkit.entity.Player;
 import static net.kyori.adventure.text.Component.empty;
 
+@Getter
 public final class PlayerBossBar {
     private boolean shown;
     private BossBar bossbar = BossBar.bossBar(empty(), 1.0f, BossBar.Color.BLUE, BossBar.Overlay.PROGRESS);
