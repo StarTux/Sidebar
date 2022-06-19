@@ -1,90 +1,66 @@
 package com.cavetale.sidebar;
 
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 @RequiredArgsConstructor
-public final class Sessions {
+public final class Sessions implements Listener {
     private final SidebarPlugin plugin;
-    private final Map<UUID, Sidebar> sidebars = new HashMap<>();
+    private final Map<UUID, Session> sessions = new HashMap<>();
 
-    public Sidebar get(Player player) {
-        return sidebars.get(player.getUniqueId());
-    }
-
-    /**
-     * Get or create.
-     */
-    public Sidebar of(Player player) {
-        return sidebars.computeIfAbsent(player.getUniqueId(), u -> {
-                Sidebar sidebar = new Sidebar(plugin, player);
-                sidebar.open(player);
-                return sidebar;
-            });
-    }
-
-    void clear(Player player) {
-        sidebars.remove(player.getUniqueId());
-    }
-
-    /**
-     * Player joins or is online while plugin loads.
-     */
-    void enter(Player player) {
-        Sidebar sidebar = get(player);
-        if (sidebar != null) {
-            sidebar.close(player);
+    protected void enable() {
+        Bukkit.getPluginManager().registerEvents(this, plugin);
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            enter(player);
         }
-        sidebar = of(player);
+        Bukkit.getScheduler().runTaskTimer(plugin, this::tick, 0L, 1L);
     }
 
-    /**
-     * Player quits or is online while plugin unloads.
-     */
-    void exit(Player player) {
-        Sidebar sidebar = get(player);
-        if (sidebar != null) {
-            sidebar.close(player);
-            clear(player);
+    protected void disable() {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            exit(player);
         }
     }
 
-    void tick(Player player) {
-        Sidebar sidebar = get(player);
-        if (sidebar == null) {
-            sidebar = of(player);
-        } else if (!plugin.hasPermission(player)) {
-            sidebar.reset();
-            return;
+    public Session get(Player player) {
+        return sessions.get(player.getUniqueId());
+    }
+
+    private void enter(Player player) {
+        Session session = new Session(plugin, player);
+        session.enable(player);
+        sessions.put(session.uuid, session);
+    }
+
+    private void exit(Player player) {
+        Session session = sessions.remove(player);
+        if (session != null) {
+            session.disable(player);
         }
-        if (!sidebar.canSee()) return;
-        PlayerSidebarEvent event = new PlayerSidebarEvent(plugin, player);
-        plugin.getServer().getPluginManager().callEvent(event);
-        List<Entry> entries = event.entries;
-        if (entries.isEmpty()) {
-            sidebar.reset();
-            sidebar.update();
-            return;
+    }
+
+    private void tick() {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            Session session = get(player);
+            if (session != null) session.tick(player);
         }
-        Collections.sort(entries);
-        int lineCount = entries.stream().mapToInt(Entry::getLineCount).sum();
-        boolean doInsertBreaks = lineCount + entries.size() - 1 <= 15;
-        sidebar.clear();
-        for (int i = 0; i < entries.size(); i += 1) {
-            Entry entry = entries.get(i);
-            if (doInsertBreaks && i > 0) {
-                sidebar.newLine(Component.empty());
-            }
-            for (Component line : entry.lines) {
-                sidebar.newLine(line);
-            }
-        }
-        sidebar.update();
+    }
+
+    @EventHandler
+    void onPlayerJoin(PlayerJoinEvent event) {
+        enter(event.getPlayer());
+    }
+
+    @EventHandler
+    void onPlayerQuit(PlayerQuitEvent event) {
+        exit(event.getPlayer());
     }
 }

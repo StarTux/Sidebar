@@ -1,56 +1,53 @@
 package com.cavetale.sidebar;
 
-import java.awt.Color;
+import com.cavetale.core.event.hud.PlayerHudEntry;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.RenderType;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
+import static com.cavetale.core.font.Unicode.tiny;
+import static java.awt.Color.HSBtoRGB;
+import static net.kyori.adventure.text.Component.empty;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.format.TextColor.color;
 
 /**
  * The actual sidebar for one player.
  */
 @Getter
 public final class Sidebar {
-    static final String CHARS = "0123456789abcdef";
-    private final SidebarPlugin plugin;
-    private final Scoreboard scoreboard;
-    private final Objective objective;
-    private final List<Line> lines;
+    protected Scoreboard scoreboard;
+    protected Objective objective;
+    private final List<SidebarLine> lines = new ArrayList<>();
     private int cursor = 0;
-    private final UUID playerUuid;
-    private final String playerName;
     private boolean visible = true;
-    @Setter private boolean debug = false;
     private int ticks;
     private int colorIndex;
 
-    public Sidebar(@NonNull final SidebarPlugin plugin, final Player player) {
-        this.plugin = plugin;
-        this.playerUuid = player.getUniqueId();
-        this.playerName = player.getName();
-        scoreboard = Bukkit.getServer().getScoreboardManager().getNewScoreboard();
-        objective = scoreboard.registerNewObjective("sidebar", "dummy", Component.text("/sidebar"), RenderType.INTEGER);
+    protected void enable(Player player) {
+        this.scoreboard = Bukkit.getServer().getScoreboardManager().getNewScoreboard();
+        this.objective = scoreboard.registerNewObjective("sidebar", "dummy", empty(), RenderType.INTEGER);
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
-        lines = new ArrayList<>();
         Team team = scoreboard.registerNewTeam("Sidebar");
         team.addEntry(player.getName());
+        if (!player.getScoreboard().equals(scoreboard)) {
+            player.setScoreboard(scoreboard);
+        }
     }
 
-    public Player getPlayer() {
-        return Bukkit.getPlayer(playerUuid);
+    protected void disable(Player player) {
+        if (player.getScoreboard().equals(scoreboard)) {
+            player.setScoreboard(Bukkit.getServer().getScoreboardManager().getMainScoreboard());
+        }
     }
 
     public void setCursor(final int newCursor) {
@@ -66,12 +63,12 @@ public final class Sidebar {
             throw new IllegalStateException("Sidebar cursor: " + cursor
                                             + "/" + lines.size());
         }
-        Line line;
+        SidebarLine line;
         if (cursor == lines.size()) {
             if (lines.size() >= 15) {
                 return;
             }
-            line = new Line(lines.size());
+            line = new SidebarLine(this, lines.size());
             lines.add(line);
             line.enable();
         } else {
@@ -83,8 +80,6 @@ public final class Sidebar {
 
     public void setLine(final int lineNumber, @NonNull Component display) {
         if (lineNumber < 0 || lineNumber >= lines.size()) {
-            plugin.getLogger().warning("Sidebar setLine index out of bounds:"
-                                       + lineNumber + "/" + lines.size());
             return;
         }
         lines.get(lineNumber).now = display;
@@ -98,36 +93,22 @@ public final class Sidebar {
         objective.displayName(component);
     }
 
+    /**
+     * Clear all lines.
+     */
     public void clear() {
-        for (Line line : lines) {
+        for (SidebarLine line : lines) {
             line.now = Component.empty();
         }
         cursor = 0;
     }
 
     public void reset() {
-        for (Line line : lines) {
+        for (SidebarLine line : lines) {
             line.disable();
         }
         lines.clear();
         cursor = 0;
-    }
-
-    public void open(@NonNull Player player) {
-        if (!player.getScoreboard().equals(scoreboard)) {
-            player.setScoreboard(scoreboard);
-        }
-    }
-
-    public void close(@NonNull Player player) {
-        if (player.getScoreboard().equals(scoreboard)) {
-            player.setScoreboard(Bukkit.getServer().getScoreboardManager()
-                                 .getMainScoreboard());
-        }
-    }
-
-    public boolean canSee() {
-        return visible;
     }
 
     public void show() {
@@ -139,8 +120,11 @@ public final class Sidebar {
         reset();
     }
 
+    /**
+     * Update all visible lines.
+     */
     public void update() {
-        if (!visible || lines.isEmpty()) return;
+        if (lines.isEmpty()) return;
         int index = lines.size() - 1;
         if (lines.get(index).isEmpty()) {
             lines.get(index).disable();
@@ -149,59 +133,43 @@ public final class Sidebar {
                 cursor -= 1;
             }
         }
-        for (Line line : lines) {
+        for (SidebarLine line : lines) {
             line.update();
         }
         if (ticks % 10 == 0) {
             colorIndex += 1;
             if (colorIndex >= 256) colorIndex = 0;
-            int rgb = 0xFFFFFF & Color.HSBtoRGB(((float) colorIndex) / 256.0f, 1.0f, 1.0f);
-            setTitle(Component.text("/sidebar").color(TextColor.color(rgb)));
+            final float hue = (float) colorIndex / 256.0f;
+            final int rgb = 0xFFFFFF & HSBtoRGB(hue, 1.0f, 1.0f);
+            setTitle(text(tiny("sidebar"), color(rgb)));
         }
         ticks += 1;
     }
 
-    @RequiredArgsConstructor @Getter
-    public final class Line {
-        final int index;
-        String name;
-        Team team = null;
-        Component old;
-        Component now;
-
-        void enable() {
-            name = "" + ChatColor.COLOR_CHAR + CHARS.charAt(index);
-            team = scoreboard.getTeam(name);
-            objective.getScore(name).setScore(1);
-            if (team == null) {
-                team = scoreboard.registerNewTeam(name);
+    /**
+     * Accept a new set of entries.
+     */
+    protected void loadEntries(List<PlayerHudEntry> entries) {
+        if (entries.isEmpty()) {
+            reset();
+            return;
+        }
+        Collections.sort(entries);
+        int lineCount = 0;
+        for (PlayerHudEntry entry : entries) {
+            lineCount += entry.getLineCount();
+        }
+        boolean doInsertBreaks = lineCount + entries.size() - 1 <= 15;
+        clear();
+        for (int i = 0; i < entries.size(); i += 1) {
+            PlayerHudEntry entry = entries.get(i);
+            if (doInsertBreaks && i > 0) {
+                newLine(Component.empty());
             }
-            team.addEntry(name);
-            now = Component.empty();
-            team.prefix(now);
-            old = now;
-            if (debug) {
-                getPlayer().sendMessage(Component.text("Sidebar enable line #" + index + ": ").append(now));
-            }
-        }
-
-        void disable() {
-            team.unregister();
-            team = null;
-            scoreboard.resetScores(name);
-        }
-
-        boolean isEmpty() {
-            return Component.empty().equals(now);
-        }
-
-        void update() {
-            if (old.equals(now)) return;
-            old = now;
-            team.prefix(now);
-            if (debug) {
-                getPlayer().sendMessage(Component.text("Sidebar update line #" + index + ": ").append(now));
+            for (Component line : entry.getLines()) {
+                newLine(line);
             }
         }
+        update();
     }
 }

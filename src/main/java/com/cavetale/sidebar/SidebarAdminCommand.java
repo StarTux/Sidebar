@@ -19,9 +19,6 @@ public final class SidebarAdminCommand implements TabExecutor {
 
     public SidebarAdminCommand enable() {
         rootNode = new CommandNode("sidebaradmin");
-        rootNode.addChild("debug").denyTabCompletion()
-            .description("Toggle debug mode")
-            .playerCaller(this::debug);
         rootNode.addChild("view").arguments("<player>")
             .description("View someone's sidebar content")
             .senderCaller(this::view);
@@ -39,24 +36,16 @@ public final class SidebarAdminCommand implements TabExecutor {
         return rootNode.complete(sender, command, alias, args);
     }
 
-    boolean debug(Player player, String[] args) {
-        if (args.length != 0) return false;
-        Sidebar sidebar = plugin.sessions.of(player);
-        boolean debug = !sidebar.isDebug();
-        sidebar.setDebug(debug);
-        player.sendMessage(Component.text("Debug mode " + (debug ? "enabled" : "disabled")).color(TextColor.color(0xFFFF00)));
-        return true;
-    }
-
-    boolean view(CommandSender sender, String[] args) {
+    private boolean view(CommandSender sender, String[] args) {
         if (args.length != 1) return false;
         Player target = Bukkit.getPlayerExact(args[0]);
         if (target == null) throw new CommandWarn("Player not found: " + args[0]);
-        Sidebar sidebar = plugin.sessions.get(target);
-        if (sidebar == null) throw new CommandWarn(target.getName() + " has no sidebar!");
-        List<Sidebar.Line> lines = sidebar.getLines();
+        Session session = plugin.sessions.get(target);
+        if (session == null) throw new CommandWarn(target.getName() + " does not have a session!");
+        Sidebar sidebar = session.getSidebar();
+        List<SidebarLine> lines = sidebar.getLines();
         sender.sendMessage(Component.text(target.getName() + " has " + lines.size() + " line(s)").color(TextColor.color(0xFFFF00)));
-        for (Sidebar.Line line : lines) {
+        for (SidebarLine line : lines) {
             sender.sendMessage(Component.text("Line #" + line.getIndex() + ": ").append(line.getNow()));
         }
         return true;

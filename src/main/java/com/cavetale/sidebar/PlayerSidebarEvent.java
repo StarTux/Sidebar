@@ -1,5 +1,6 @@
 package com.cavetale.sidebar;
 
+import com.cavetale.core.event.hud.PlayerHudEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -15,8 +16,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 @RequiredArgsConstructor
 public final class PlayerSidebarEvent extends Event {
     private static final HandlerList HANDLERS = new HandlerList();
-    final List<Entry> entries = new ArrayList<>();
-    @Getter final SidebarPlugin sidebarPlugin;
+    final List<PlayerHudEntry> entries = new ArrayList<>();
     @Getter final Player player;
 
     @Deprecated
@@ -28,7 +28,7 @@ public final class PlayerSidebarEvent extends Event {
         for (String string : strings) {
             lines.add(Component.text(string));
         }
-        entries.add(new Entry(plugin, priority, lines));
+        entries.add(new PlayerHudEntry(priority.value, lines));
     }
 
     @Deprecated
@@ -40,15 +40,11 @@ public final class PlayerSidebarEvent extends Event {
         if (lines.isEmpty()) {
             throw new IllegalArgumentException("lines is empty");
         }
-        entries.add(new Entry(plugin, priority, lines));
+        entries.add(new PlayerHudEntry(priority.value, lines));
     }
 
     public void add(@NonNull JavaPlugin plugin, @NonNull Priority priority, @NonNull Component... lines) {
         add(plugin, priority, Arrays.asList(lines));
-    }
-
-    public Sidebar getSidebar() {
-        return sidebarPlugin.sessions.get(player);
     }
 
     @Override
