@@ -3,9 +3,7 @@ package com.cavetale.sidebar;
 import com.cavetale.core.event.hud.PlayerHudEntry;
 import com.cavetale.core.event.hud.PlayerHudEvent;
 import com.cavetale.core.event.hud.PlayerHudPriority;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import lombok.Getter;
@@ -43,8 +41,6 @@ public final class Session {
         bossbar.disable(player);
     }
 
-    private static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("HH:mm:ss");
-
     protected void tick(Player player) {
         PlayerHudEvent playerHudEvent = new PlayerHudEvent(player);
         playerHudEvent.callEvent();
@@ -59,8 +55,9 @@ public final class Session {
         }
         List<PlayerHudEntry> headerList = new ArrayList<>();
         headerList.addAll(playerHudEvent.getHeader());
-        headerList.add(new PlayerHudEntry(PlayerHudPriority.LOWEST.value,
-                                          List.of(text(TIME_FORMAT.format(new Date()), GRAY))));
+        if (!plugin.sessions.serverTimeComponent.isEmpty()) {
+            headerList.add(new PlayerHudEntry(PlayerHudPriority.LOWEST.value, plugin.sessions.serverTimeComponent));
+        }
         header.loadEntries(player, headerList);
         List<PlayerHudEntry> footerList = new ArrayList<>();
         footerList.addAll(playerHudEvent.getFooter());
