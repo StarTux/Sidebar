@@ -162,9 +162,7 @@ public final class Sidebar {
         clear();
         for (int i = 0; i < entries.size(); i += 1) {
             PlayerHudEntry entry = entries.get(i);
-            if (i > 0 && i < entries.size() - 1) {
-                newLine(empty());
-            }
+            if (i > 0) newLine(empty());
             for (Component line : entry.getLines()) {
                 newLine(line);
             }
