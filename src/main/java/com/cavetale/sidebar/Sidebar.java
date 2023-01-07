@@ -9,6 +9,7 @@ import lombok.NonNull;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.scoreboard.Criteria;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.RenderType;
@@ -35,7 +36,7 @@ public final class Sidebar {
 
     protected void enable(Player player) {
         this.scoreboard = Bukkit.getServer().getScoreboardManager().getNewScoreboard();
-        this.objective = scoreboard.registerNewObjective("sidebar", "dummy", empty(), RenderType.INTEGER);
+        this.objective = scoreboard.registerNewObjective("sidebar", Criteria.DUMMY, empty(), RenderType.INTEGER);
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
         Team team = scoreboard.registerNewTeam("Sidebar");
         team.addEntry(player.getName());
