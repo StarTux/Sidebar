@@ -98,7 +98,7 @@ public final class Sidebar {
      */
     public void clear() {
         for (SidebarLine line : lines) {
-            line.now = Component.empty();
+            line.now = empty();
         }
         cursor = 0;
     }
@@ -159,12 +159,11 @@ public final class Sidebar {
         for (PlayerHudEntry entry : entries) {
             lineCount += entry.getLineCount();
         }
-        boolean doInsertBreaks = lineCount + entries.size() - 1 <= 15;
         clear();
         for (int i = 0; i < entries.size(); i += 1) {
             PlayerHudEntry entry = entries.get(i);
-            if (doInsertBreaks && i > 0) {
-                newLine(Component.empty());
+            if (i > 0 && i < entries.size() - 1) {
+                newLine(empty());
             }
             for (Component line : entry.getLines()) {
                 newLine(line);
