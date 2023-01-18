@@ -1,6 +1,7 @@
 package com.cavetale.sidebar;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,7 @@ public final class Sessions implements Listener {
     private final SidebarPlugin plugin;
     private final Map<UUID, Session> sessions = new HashMap<>();
     protected List<Component> serverTimeComponent = List.of();
+    private final ZoneId timezone = ZoneId.of("UTC-11");
 
     protected void enable() {
         Bukkit.getPluginManager().registerEvents(this, plugin);
@@ -67,7 +69,7 @@ public final class Sessions implements Listener {
             Session session = get(player);
             if (session != null) session.tick(player);
         }
-        LocalDateTime date = LocalDateTime.now();
+        LocalDateTime date = LocalDateTime.now(timezone);
         serverTimeComponent = List.of(join(noSeparators(),
                                            text(tiny("time "), GRAY),
                                            text(padZeros(date.getHour())),
