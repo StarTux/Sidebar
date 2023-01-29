@@ -66,8 +66,29 @@ public final class Session {
             final int x = loc.getBlockX();
             final int y = loc.getBlockY();
             final int z = loc.getBlockZ();
+            final float yaw = loc.getYaw();
+            final String facing;
+            if (yaw < -157.5f) {
+                facing = "N";
+            } else if (yaw < -112.5f) {
+                facing = "NE";
+            } else if (yaw < -67.5f) {
+                facing = "E";
+            } else if (yaw < -22.5f) {
+                facing = "SE";
+            } else if (yaw < 22.5f) {
+                facing = "S";
+            } else if (yaw < 67.5f) {
+                facing = "SW";
+            } else if (yaw < 112.5f) {
+                facing = "W";
+            } else if (yaw < 157.5f) {
+                facing = "NW";
+            } else {
+                facing = "N";
+            }
             footerList.add(new PlayerHudEntry(PlayerHudPriority.DEFAULT.value,
-                                              List.of(text(x + " " + y + " " + z, GRAY))));
+                                              List.of(text(x + " " + y + " " + z + " " + facing, GRAY))));
         }
         footer.loadEntries(player, footerList);
         bossbar.loadEntries(player, playerHudEvent.getBossbar());
