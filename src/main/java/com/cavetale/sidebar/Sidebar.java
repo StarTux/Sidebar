@@ -125,7 +125,10 @@ public final class Sidebar {
      * Update all visible lines.
      */
     public void update() {
-        if (lines.isEmpty()) return;
+        if (lines.isEmpty()) {
+            setTitle(null);
+            return;
+        }
         int index = lines.size() - 1;
         if (lines.get(index).isEmpty()) {
             lines.get(index).disable();
