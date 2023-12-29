@@ -51,7 +51,7 @@ public final class Session {
             playerSidebarEvent.callEvent();
             entries.addAll(playerSidebarEvent.entries);
             entries.addAll(playerHudEvent.getSidebar());
-            sidebar.loadEntries(entries);
+            sidebar.update(entries);
         }
         List<PlayerHudEntry> headerList = new ArrayList<>();
         headerList.addAll(playerHudEvent.getHeader());

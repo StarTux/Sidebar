@@ -36,8 +36,6 @@ public final class Sidebar {
 
     protected void enable(Player player) {
         this.scoreboard = Bukkit.getServer().getScoreboardManager().getNewScoreboard();
-        this.objective = scoreboard.registerNewObjective("sidebar", Criteria.DUMMY, empty(), RenderType.INTEGER);
-        objective.setDisplaySlot(DisplaySlot.SIDEBAR);
         Team team = scoreboard.registerNewTeam("Sidebar");
         team.addEntry(player.getName());
         if (!player.getScoreboard().equals(scoreboard)) {
@@ -90,10 +88,6 @@ public final class Sidebar {
         return lines.size();
     }
 
-    public void setTitle(@NonNull Component component) {
-        objective.displayName(component);
-    }
-
     /**
      * Clear all lines.
      */
@@ -119,16 +113,37 @@ public final class Sidebar {
     public void hide() {
         visible = false;
         reset();
+        removeObjective();
     }
 
     /**
-     * Update all visible lines.
+     * Accept a new set of entries.
      */
-    public void update() {
-        if (lines.isEmpty()) {
-            setTitle(null);
+    protected void update(List<PlayerHudEntry> entries) {
+        if (entries.isEmpty()) {
+            removeObjective();
+            reset();
             return;
         }
+        if (objective == null) {
+            objective = scoreboard.registerNewObjective("sidebar", Criteria.DUMMY, empty(), RenderType.INTEGER);
+            objective.setDisplaySlot(DisplaySlot.SIDEBAR);
+        }
+        assert objective != null;
+        Collections.sort(entries);
+        int lineCount = 0;
+        for (PlayerHudEntry entry : entries) {
+            lineCount += entry.getLineCount();
+        }
+        clear();
+        for (int i = 0; i < entries.size(); i += 1) {
+            PlayerHudEntry entry = entries.get(i);
+            if (i > 0) newLine(empty());
+            for (Component line : entry.getLines()) {
+                newLine(line);
+            }
+        }
+        // Update all visible lines
         int index = lines.size() - 1;
         if (lines.get(index).isEmpty()) {
             lines.get(index).disable();
@@ -145,32 +160,14 @@ public final class Sidebar {
             if (colorIndex >= 256) colorIndex = 0;
             final float hue = (float) colorIndex / 256.0f;
             final int rgb = 0xFFFFFF & HSBtoRGB(hue, 1.0f, 1.0f);
-            setTitle(text(tiny("sidebar"), color(rgb)));
+            objective.displayName(text(tiny("sidebar"), color(rgb)));
         }
         ticks += 1;
     }
 
-    /**
-     * Accept a new set of entries.
-     */
-    protected void loadEntries(List<PlayerHudEntry> entries) {
-        if (entries.isEmpty()) {
-            reset();
-            return;
-        }
-        Collections.sort(entries);
-        int lineCount = 0;
-        for (PlayerHudEntry entry : entries) {
-            lineCount += entry.getLineCount();
-        }
-        clear();
-        for (int i = 0; i < entries.size(); i += 1) {
-            PlayerHudEntry entry = entries.get(i);
-            if (i > 0) newLine(empty());
-            for (Component line : entry.getLines()) {
-                newLine(line);
-            }
-        }
-        update();
+    private void removeObjective() {
+        if (objective == null) return;
+        objective.unregister();
+        objective = null;
     }
 }
