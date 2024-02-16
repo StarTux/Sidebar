@@ -3,11 +3,11 @@ package com.cavetale.sidebar;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.text.Component;
-import org.bukkit.ChatColor;
 import org.bukkit.scoreboard.Team;
 
 @RequiredArgsConstructor @Getter
 public final class SidebarLine {
+    public static final String COLOR_CHAR = "\u00A7";
     private static final String CHARS = "0123456789abcdef";
     protected final Sidebar sidebar;
     protected final int index;
@@ -17,7 +17,10 @@ public final class SidebarLine {
     protected Component now;
 
     public void enable() {
-        name = "" + ChatColor.COLOR_CHAR + CHARS.charAt(index);
+        if (index >= CHARS.length()) return;
+        name = index < CHARS.length()
+            ? "" + COLOR_CHAR + CHARS.charAt(index)
+            : "";
         team = sidebar.scoreboard.getTeam(name);
         sidebar.objective.getScore(name).setScore(1);
         if (team == null) {
@@ -30,6 +33,7 @@ public final class SidebarLine {
     }
 
     public void disable() {
+        if (index >= CHARS.length()) return;
         team.unregister();
         team = null;
         sidebar.scoreboard.resetScores(name);
@@ -40,6 +44,7 @@ public final class SidebarLine {
     }
 
     public void update() {
+        if (index >= CHARS.length()) return;
         if (old.equals(now)) return;
         old = now;
         team.prefix(now);

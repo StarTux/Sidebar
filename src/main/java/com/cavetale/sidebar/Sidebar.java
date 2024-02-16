@@ -26,6 +26,7 @@ import static net.kyori.adventure.text.format.TextColor.color;
  */
 @Getter
 public final class Sidebar {
+    public static final int MAX_LINES = 15;
     protected Scoreboard scoreboard;
     protected Objective objective;
     private final List<SidebarLine> lines = new ArrayList<>();
@@ -64,9 +65,6 @@ public final class Sidebar {
         }
         SidebarLine line;
         if (cursor == lines.size()) {
-            if (lines.size() >= 15) {
-                return;
-            }
             line = new SidebarLine(this, lines.size());
             lines.add(line);
             line.enable();
