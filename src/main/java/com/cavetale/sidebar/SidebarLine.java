@@ -3,9 +3,12 @@ package com.cavetale.sidebar;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.text.Component;
+import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Team;
+import static io.papermc.paper.scoreboard.numbers.NumberFormat.blank;
 
-@RequiredArgsConstructor @Getter
+@Getter
+@RequiredArgsConstructor
 public final class SidebarLine {
     public static final String COLOR_CHAR = "\u00A7";
     private static final String CHARS = "0123456789abcdef";
@@ -22,7 +25,9 @@ public final class SidebarLine {
             ? "" + COLOR_CHAR + CHARS.charAt(index)
             : "";
         team = sidebar.scoreboard.getTeam(name);
-        sidebar.objective.getScore(name).setScore(1);
+        final Score score = sidebar.objective.getScore(name);
+        score.setScore(1);
+        score.numberFormat(blank());
         if (team == null) {
             team = sidebar.scoreboard.registerNewTeam(name);
         }
