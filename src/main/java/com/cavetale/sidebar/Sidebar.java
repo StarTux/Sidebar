@@ -1,6 +1,7 @@
 package com.cavetale.sidebar;
 
 import com.cavetale.core.event.hud.PlayerHudEntry;
+import com.cavetale.core.font.DefaultFont;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -15,11 +16,7 @@ import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.RenderType;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
-import static com.cavetale.core.font.Unicode.tiny;
-import static java.awt.Color.HSBtoRGB;
 import static net.kyori.adventure.text.Component.empty;
-import static net.kyori.adventure.text.Component.text;
-import static net.kyori.adventure.text.format.TextColor.color;
 
 /**
  * The actual sidebar for one player.
@@ -124,7 +121,7 @@ public final class Sidebar {
             return;
         }
         if (objective == null) {
-            objective = scoreboard.registerNewObjective("sidebar", Criteria.DUMMY, empty(), RenderType.INTEGER);
+            objective = scoreboard.registerNewObjective("sidebar", Criteria.DUMMY, DefaultFont.CAVETALE.asComponent(), RenderType.INTEGER);
             objective.setDisplaySlot(DisplaySlot.SIDEBAR);
         }
         assert objective != null;
@@ -152,13 +149,6 @@ public final class Sidebar {
         }
         for (SidebarLine line : lines) {
             line.update();
-        }
-        if (ticks % 10 == 0) {
-            colorIndex += 1;
-            if (colorIndex >= 256) colorIndex = 0;
-            final float hue = (float) colorIndex / 256.0f;
-            final int rgb = 0xFFFFFF & HSBtoRGB(hue, 1.0f, 1.0f);
-            objective.displayName(text(tiny("sidebar"), color(rgb)));
         }
         ticks += 1;
     }
